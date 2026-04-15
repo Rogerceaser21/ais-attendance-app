@@ -1,0 +1,1211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AIS Attendance App — Executive Briefing</title>
+
+<!-- Fonts: Manrope — Electric Studio preset -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+
+<style>
+/* ============================================================
+   THEME — Electric Studio
+   White + dark split, electric blue accent
+   ============================================================ */
+:root {
+  --bg-dark:   #0a0a0a;
+  --bg-white:  #ffffff;
+  --bg-soft:   #f6f7fa;
+  --accent:    #4361ee;
+  --accent-deep: #2f46c8;
+  --accent-rgb: 67, 97, 238;
+  --text-dark: #0a0a0a;
+  --text-mute: #555;
+  --text-soft: #8a8a8a;
+  --text-light: #ffffff;
+
+  --font-display: 'Manrope', sans-serif;
+
+  --font-scale: 1;
+  --title-size:  calc(clamp(2.4rem, 7.5vw, 6rem) * var(--font-scale));
+  --h2-size:     calc(clamp(1.5rem, 3.8vw, 3rem)  * var(--font-scale));
+  --h3-size:     calc(clamp(1.05rem, 2.2vw, 1.6rem) * var(--font-scale));
+  --body-size:   calc(clamp(0.9rem, 1.5vw, 1.15rem) * var(--font-scale));
+  --small-size:  calc(clamp(0.75rem, 1.1vw, 0.9rem) * var(--font-scale));
+  --label-size:  calc(clamp(0.65rem, 0.95vw, 0.8rem) * var(--font-scale));
+
+  --slide-padding: clamp(1.2rem, 3vw, 2.5rem);
+  --gap:           clamp(1rem, 2vw, 2rem);
+  --gap-sm:        clamp(0.5rem, 1.2vw, 1rem);
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --duration:      0.65s;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; overflow-x: hidden; }
+body {
+  background: var(--bg-soft);
+  color: var(--text-dark);
+  font-family: var(--font-display);
+  font-weight: 400;
+  overflow: hidden;
+}
+
+.slides-container {
+  position: relative;
+  width: 100vw; height: 100vh; height: 100dvh;
+}
+.slide {
+  position: absolute; inset: 0;
+  width: 100vw; height: 100vh; height: 100dvh;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(20px);
+  pointer-events: none;
+  transition: opacity 0.5s var(--ease-out-expo), transform 0.5s var(--ease-out-expo);
+}
+.slide.active { opacity: 1; transform: translateY(0); pointer-events: auto; z-index: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.2s !important; }
+}
+
+/* ============================================================
+   AIS LOGO — top-right on every slide, on white area
+   ============================================================ */
+.ais-logo {
+  position: absolute;
+  top: clamp(0.8rem, 1.8vh, 1.5rem);
+  right: clamp(0.8rem, 1.8vw, 1.5rem);
+  height: clamp(32px, 5vh, 54px);
+  z-index: 5;
+}
+.slide.title-slide .ais-logo,
+.slide.qa-slide .ais-logo {
+  top: clamp(1rem, 2.5vh, 2rem);
+  right: clamp(1.2rem, 3vw, 2.5rem);
+  height: clamp(38px, 6vh, 64px);
+}
+
+/* ============================================================
+   STAGGERED REVEAL
+   ============================================================ */
+.reveal {
+  opacity: 0; transform: translateY(26px);
+  transition: opacity var(--duration) var(--ease-out-expo), transform var(--duration) var(--ease-out-expo);
+}
+.slide.active .reveal { opacity: 1; transform: translateY(0); }
+.reveal-left {
+  opacity: 0; transform: translateX(-26px);
+  transition: opacity var(--duration) var(--ease-out-expo), transform var(--duration) var(--ease-out-expo);
+}
+.slide.active .reveal-left { opacity: 1; transform: translateX(0); }
+.reveal-scale {
+  opacity: 0; transform: scale(0.96);
+  transition: opacity var(--duration) var(--ease-out-expo), transform var(--duration) var(--ease-out-expo);
+}
+.slide.active .reveal-scale { opacity: 1; transform: scale(1); }
+.d1 { transition-delay: 0.05s; }
+.d2 { transition-delay: 0.18s; }
+.d3 { transition-delay: 0.32s; }
+.d4 { transition-delay: 0.45s; }
+.d5 { transition-delay: 0.58s; }
+.d6 { transition-delay: 0.7s; }
+
+/* ============================================================
+   TITLE SLIDE — split layout (signature Electric Studio)
+   ============================================================ */
+.title-slide {
+  display: flex; flex-direction: column;
+}
+.title-top {
+  flex: 1.15;
+  background: var(--bg-white);
+  padding: clamp(1.5rem, 4vw, 4rem);
+  display: flex; flex-direction: column; justify-content: flex-end;
+  position: relative;
+  border-bottom: clamp(0.4rem, 0.9vw, 0.8rem) solid var(--accent);
+}
+.title-top::before {
+  content: '';
+  position: absolute; top: 0; right: 0;
+  width: clamp(60px, 8vw, 120px); height: clamp(60px, 8vw, 120px);
+  background: var(--accent); border-radius: 0 0 0 100%;
+  opacity: 0.15;
+}
+.title-bot {
+  flex: 0.85;
+  background: var(--bg-dark);
+  color: var(--text-light);
+  padding: clamp(1.5rem, 4vw, 4rem);
+  display: flex; flex-direction: column; justify-content: center;
+  gap: clamp(0.6rem, 1.5vw, 1.2rem);
+}
+.title-eyebrow {
+  font-weight: 800; font-size: var(--small-size);
+  letter-spacing: 0.3em; text-transform: uppercase; color: var(--accent);
+}
+.title-main {
+  font-weight: 800; font-size: var(--title-size);
+  line-height: 0.95; letter-spacing: -0.03em; color: var(--text-dark);
+  margin: clamp(0.8rem, 2vw, 1.4rem) 0 clamp(0.5rem, 1vw, 0.9rem);
+}
+.title-sub {
+  font-weight: 300; font-size: clamp(0.95rem, 1.7vw, 1.25rem);
+  line-height: 1.5; color: var(--text-mute); max-width: 78%;
+}
+.title-meta {
+  font-weight: 700; font-size: var(--label-size);
+  letter-spacing: 0.3em; text-transform: uppercase; color: var(--accent);
+}
+.title-tagline {
+  font-weight: 500; font-size: clamp(1.1rem, 2.2vw, 1.7rem);
+  line-height: 1.4; max-width: 85%;
+}
+
+/* ============================================================
+   CONTENT SLIDES — white card with logo, dark accent bar
+   ============================================================ */
+.content-slide {
+  background: var(--bg-dark);
+  padding: clamp(0.8rem, 2vw, 2rem);
+  display: flex;
+}
+.content-card {
+  flex: 1;
+  background: var(--bg-white);
+  border-radius: clamp(10px, 1.5vw, 20px);
+  padding: clamp(1.4rem, 3vw, 2.8rem) clamp(1.4rem, 3.5vw, 3.2rem);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+  max-height: 100%;
+  gap: var(--gap-sm);
+}
+.content-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: clamp(3px, 0.4vw, 5px);
+  background: linear-gradient(90deg, var(--accent), var(--accent-deep));
+}
+
+.eyebrow {
+  font-weight: 800; font-size: var(--small-size);
+  letter-spacing: 0.3em; text-transform: uppercase; color: var(--accent);
+}
+.eyebrow .num {
+  font-family: var(--font-display); font-weight: 800;
+  color: var(--text-soft); margin-right: 0.8em; letter-spacing: 0.1em;
+}
+.slide-title {
+  font-weight: 800; font-size: var(--h2-size);
+  line-height: 1.05; letter-spacing: -0.025em; color: var(--text-dark);
+}
+.slide-subtitle {
+  font-weight: 500; font-size: var(--h3-size);
+  color: var(--accent); line-height: 1.25;
+}
+.body-text {
+  font-weight: 400; font-size: var(--body-size);
+  color: var(--text-mute); line-height: 1.55; max-width: 80ch;
+}
+.accent-bar {
+  width: clamp(50px, 7vw, 110px);
+  height: 4px;
+  background: var(--accent);
+  border-radius: 2px;
+  margin: 0.3em 0 0.5em;
+}
+
+/* ============================================================
+   SLIDE 2 LAYOUT — narrow text column + wide video column
+   ============================================================ */
+.slide-2-grid {
+  display: grid;
+  grid-template-columns: minmax(220px, 28%) 1fr;
+  gap: var(--gap);
+  flex: 1;
+  min-height: 0;
+  margin-top: var(--gap-sm);
+  align-items: stretch;
+}
+@media (max-width: 900px) {
+  .slide-2-grid { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+}
+.slide-2-text {
+  display: flex; flex-direction: column;
+  gap: var(--gap-sm);
+  justify-content: center;
+  min-width: 0;
+}
+.video-wrap {
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000;
+  border-radius: clamp(6px, 1vw, 12px);
+  overflow: hidden;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+  border: 2px solid rgba(var(--accent-rgb), 0.2);
+  aspect-ratio: 16 / 9;
+  width: 100%;
+  max-height: 100%;
+  margin: auto 0;
+}
+.video-wrap iframe {
+  width: 100%; height: 100%;
+  border: none;
+  display: block;
+}
+
+/* ============================================================
+   SLIDE 3 LAYOUT — content + email screenshot
+   ============================================================ */
+.slide-3-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 0.85fr;
+  gap: var(--gap);
+  flex: 1;
+  min-height: 0;
+  margin-top: var(--gap-sm);
+  align-items: stretch;
+}
+@media (max-width: 900px) {
+  .slide-3-grid { grid-template-columns: 1fr; }
+}
+.slide-3-text {
+  display: flex; flex-direction: column;
+  gap: var(--gap-sm);
+  min-width: 0;
+}
+.slide-3-image {
+  display: flex; align-items: center; justify-content: center;
+  min-height: 0;
+}
+.slide-3-image img {
+  max-width: 100%;
+  max-height: min(70vh, 560px);
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+  border: 1px solid rgba(0,0,0,0.08);
+}
+
+.feature-pills {
+  display: flex; flex-wrap: wrap;
+  gap: 0.6em;
+  margin-top: var(--gap-sm);
+}
+.pill {
+  display: inline-flex; align-items: center;
+  gap: 0.5em;
+  padding: 0.55em 1.1em;
+  background: rgba(var(--accent-rgb), 0.1);
+  border: 1px solid rgba(var(--accent-rgb), 0.25);
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: var(--small-size);
+  color: var(--accent-deep);
+  letter-spacing: 0.02em;
+}
+.pill::before {
+  content: '●'; color: var(--accent); font-size: 0.7em;
+}
+
+/* ============================================================
+   AUDIENCE CARDS (slide 3) — match slide 2's pill language
+   Rounded pill-card, violet-blue wash, same accent color family
+   ============================================================ */
+.audience-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  gap: var(--gap-sm);
+  margin-top: var(--gap-sm);
+}
+.audience-card {
+  background: rgba(var(--accent-rgb), 0.1);
+  border: 1px solid rgba(var(--accent-rgb), 0.28);
+  border-radius: clamp(16px, 2vw, 22px);
+  padding: clamp(0.65rem, 1.3vw, 1.05rem) clamp(0.95rem, 1.8vw, 1.4rem);
+  display: flex; flex-direction: column; gap: 0.25em;
+}
+.audience-card {
+  /* Small colored bar on the left edge replaces the floating dot */
+  position: relative;
+  padding-left: clamp(1.3rem, 2.2vw, 1.8rem);
+}
+.audience-card::before {
+  content: '';
+  position: absolute;
+  left: clamp(0.55rem, 1vw, 0.85rem);
+  top: 22%;
+  bottom: 22%;
+  width: 3px;
+  border-radius: 2px;
+  background: var(--accent);
+}
+.audience-label {
+  font-weight: 800; font-size: var(--small-size);
+  letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent-deep);
+}
+.audience-body {
+  font-weight: 500; font-size: var(--small-size);
+  color: var(--text-dark); line-height: 1.35;
+}
+.audience-card.admin { background: rgba(47, 70, 200, 0.12); border-color: rgba(47, 70, 200, 0.3); }
+.audience-card.admin::before { background: var(--accent-deep); }
+.audience-card.admin .audience-label { color: var(--accent-deep); }
+
+/* ============================================================
+   SAFETY CALLOUT (slide 3)
+   ============================================================ */
+.safety-callout {
+  display: flex; align-items: center; gap: 0.8em;
+  background: linear-gradient(90deg, rgba(var(--accent-rgb), 0.1), rgba(var(--accent-rgb), 0.02));
+  border: 1px solid rgba(var(--accent-rgb), 0.2);
+  border-left: 4px solid var(--accent);
+  padding: clamp(0.65rem, 1.2vw, 1rem) clamp(0.9rem, 1.8vw, 1.3rem);
+  border-radius: 8px;
+  margin-top: auto;
+}
+.safety-icon {
+  flex: 0 0 auto;
+  font-size: clamp(1.2rem, 2vw, 1.6rem);
+}
+.safety-text {
+  font-weight: 500; font-size: var(--small-size);
+  color: var(--text-dark); line-height: 1.4;
+}
+.safety-text strong { color: var(--accent-deep); font-weight: 800; }
+
+/* ============================================================
+   TWO-COLUMN (slides 4, 5) — 30% text / 70% live app embed
+   iframe goes full card height by moving header into left col
+   ============================================================ */
+.two-col {
+  display: grid;
+  grid-template-columns: 0.3fr 0.7fr;
+  gap: var(--gap);
+  flex: 1;
+  min-height: 0;
+  margin-top: 0;
+  align-items: stretch;
+}
+@media (max-width: 900px) { .two-col { grid-template-columns: 1fr; } }
+
+.two-col .col {
+  justify-content: flex-start;
+  gap: var(--gap-sm);
+}
+.two-col .col.embed-col {
+  justify-content: stretch;
+  min-height: 0;
+}
+
+.app-embed {
+  width: 100%;
+  height: 100%;
+  flex: 1;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.25);
+  border: 1px solid rgba(0,0,0,0.08);
+  background: #fafafa;
+  display: flex;
+}
+.app-embed iframe {
+  width: 100%; height: 100%;
+  border: none;
+  display: block;
+}
+.col { display: flex; flex-direction: column; gap: var(--gap-sm); min-height: 0; justify-content: center; }
+.slide-img {
+  max-width: 100%;
+  max-height: min(62vh, 500px);
+  object-fit: contain;
+  border-radius: 10px;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.25);
+  border: 1px solid rgba(0,0,0,0.08);
+}
+
+/* Big emphasis block */
+.emphasis {
+  font-weight: 800;
+  font-size: var(--h3-size);
+  color: var(--text-dark);
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+.emphasis em {
+  font-style: normal;
+  color: var(--accent);
+}
+
+.bullet-list {
+  list-style: none;
+  display: flex; flex-direction: column;
+  gap: 0.55em;
+  margin-top: var(--gap-sm);
+}
+.bullet-list li {
+  font-weight: 500; font-size: var(--body-size);
+  color: var(--text-dark); line-height: 1.45;
+  padding-left: 1.5em;
+  position: relative;
+}
+.bullet-list li::before {
+  content: '→';
+  position: absolute; left: 0; top: 0;
+  color: var(--accent); font-weight: 800;
+}
+.bullet-list li strong { color: var(--accent-deep); font-weight: 800; }
+
+/* ============================================================
+   Q&A SLIDE (slide 6) — bookend with title slide
+   ============================================================ */
+.qa-slide {
+  display: flex; flex-direction: column;
+}
+.qa-top {
+  flex: 1;
+  background: var(--bg-white);
+  padding: clamp(1.5rem, 4vw, 4rem);
+  display: flex; flex-direction: column; justify-content: center;
+  position: relative;
+  border-bottom: clamp(0.4rem, 0.9vw, 0.8rem) solid var(--accent);
+}
+.qa-main {
+  font-weight: 800; font-size: calc(clamp(3rem, 12vw, 10rem) * var(--font-scale));
+  line-height: 0.9; letter-spacing: -0.04em; color: var(--text-dark);
+}
+.qa-main em { font-style: normal; color: var(--accent); }
+.qa-bot {
+  flex: 0 0 auto;
+  background: var(--bg-dark);
+  color: var(--text-light);
+  padding: clamp(1.2rem, 3vw, 2.5rem) clamp(1.5rem, 4vw, 4rem);
+  display: flex; justify-content: space-between; align-items: center;
+  flex-wrap: wrap; gap: 1em;
+}
+.qa-thanks {
+  font-weight: 500;
+  font-size: clamp(1rem, 2vw, 1.4rem);
+}
+.qa-meta {
+  font-weight: 700; font-size: var(--small-size);
+  letter-spacing: 0.3em; text-transform: uppercase; color: var(--accent);
+}
+
+/* ============================================================
+   PROGRESS BAR + NAV DOTS + COUNTER
+   ============================================================ */
+.progress-bar-wrap {
+  position: fixed; top: 0; left: 0;
+  width: 100%; height: 3px;
+  background: rgba(255,255,255,0.08);
+  z-index: 100;
+}
+.progress-bar-fill {
+  height: 100%;
+  background: var(--accent);
+  width: 0%;
+  transition: width 0.4s var(--ease-out-expo);
+}
+.nav-dots {
+  position: fixed;
+  right: clamp(0.6rem, 1.4vw, 1.2rem);
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex; flex-direction: column; gap: 0.55em;
+  z-index: 200;
+}
+.nav-dots button {
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  border: 1.5px solid var(--accent);
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.25s ease;
+}
+.nav-dots button:hover { background: rgba(var(--accent-rgb), 0.4); }
+.nav-dots button.active { background: var(--accent); transform: scale(1.4); }
+.slide-counter {
+  position: fixed;
+  bottom: clamp(0.8rem, 2vh, 1.5rem);
+  right: clamp(1rem, 2.5vw, 2rem);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--small-size);
+  color: var(--text-light);
+  mix-blend-mode: difference;
+  letter-spacing: 0.12em;
+  z-index: 200;
+}
+
+/* ============================================================
+   FONT SCALE + FULLSCREEN PILL — bottom-left
+   ============================================================ */
+.font-scale-ctrl {
+  position: fixed;
+  bottom: clamp(0.8rem, 2vh, 1.5rem);
+  left: clamp(1rem, 2.5vw, 2rem);
+  display: flex; align-items: center; gap: 2px;
+  z-index: 1000;
+  background: var(--bg-white);
+  border: 1px solid rgba(var(--accent-rgb), 0.25);
+  border-radius: 8px;
+  padding: 0.28em 0.45em;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+}
+.font-scale-ctrl button {
+  background: none; border: none;
+  color: var(--text-mute);
+  font-family: var(--font-display);
+  font-size: clamp(0.6rem, 0.85vw, 0.72rem);
+  font-weight: 800;
+  cursor: pointer;
+  padding: 0.2em 0.45em;
+  border-radius: 4px;
+  transition: color 0.15s, background 0.15s;
+  line-height: 1;
+}
+.font-scale-ctrl button:hover { color: var(--accent); background: rgba(var(--accent-rgb), 0.1); }
+.font-scale-ctrl button:active { transform: scale(0.92); }
+.font-scale-ctrl button:disabled { opacity: 0.3; cursor: default; }
+#fontScaleLabel {
+  font-weight: 700;
+  font-size: clamp(0.55rem, 0.8vw, 0.68rem);
+  color: var(--text-mute);
+  min-width: 2.8em;
+  text-align: center;
+  letter-spacing: 0.04em;
+  user-select: none;
+}
+.font-scale-ctrl .ctrl-divider {
+  width: 1px;
+  height: 1em;
+  background: rgba(var(--accent-rgb), 0.3);
+  margin: 0 4px;
+}
+.font-scale-ctrl .fs-btn {
+  font-size: clamp(0.7rem, 1vw, 0.85rem);
+  padding: 0.15em 0.4em;
+}
+
+/* ============================================================
+   CURSOR EFFECTS CANVAS
+   ============================================================ */
+#cursorFx {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* ============================================================
+   INLINE EDITING
+   ============================================================ */
+.edit-hotzone {
+  position: fixed; top: 0; left: 0;
+  width: 80px; height: 80px;
+  z-index: 10000;
+  cursor: pointer;
+}
+.edit-toggle {
+  position: fixed;
+  top: clamp(0.8rem, 2vh, 1.5rem); left: clamp(1rem, 2.5vw, 2rem);
+  z-index: 10001;
+  background: var(--bg-white);
+  color: var(--accent);
+  border: 1.5px solid var(--accent);
+  border-radius: 50%;
+  width: 44px; height: 44px;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.edit-toggle.show, .edit-toggle.active { opacity: 1; pointer-events: auto; }
+.edit-toggle.active { background: var(--accent); color: var(--bg-white); }
+.edit-banner {
+  position: fixed;
+  top: clamp(0.8rem, 2vh, 1.5rem);
+  left: 50%; transform: translateX(-50%);
+  z-index: 10001;
+  background: var(--accent); color: var(--bg-white);
+  font-family: var(--font-display);
+  font-weight: 700; font-size: var(--small-size);
+  padding: 0.5em 1.2em;
+  border-radius: 999px;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.edit-banner.active { opacity: 1; }
+body.edit-active [contenteditable="true"] {
+  outline: 1.5px dashed rgba(var(--accent-rgb), 0.5);
+  outline-offset: 4px;
+  cursor: text;
+}
+body.edit-active [contenteditable="true"]:focus {
+  outline: 2px solid var(--accent);
+  background: rgba(var(--accent-rgb), 0.08);
+}
+
+/* ============================================================
+   RESPONSIVE IMAGE HIDING (from the skill standard)
+   ============================================================ */
+@media (max-width: 900px) {
+  .slide .col:has(.slide-img), .slide .slide-img { display: none; }
+  .slide .two-col { grid-template-columns: 1fr; }
+}
+@media (max-height: 620px) {
+  .slide .col:has(.slide-img), .slide .slide-img { display: none; }
+}
+body.scaled-up .slide .col:has(.slide-img),
+body.scaled-up .slide .slide-img { display: none; }
+
+/* Tighter spacing on short heights */
+@media (max-height: 700px) {
+  :root {
+    --slide-padding: clamp(0.8rem, 2vw, 1.6rem);
+    --gap: clamp(0.7rem, 1.5vw, 1.2rem);
+  }
+}
+@media (max-height: 600px) {
+  :root {
+    --title-size: calc(clamp(1.8rem, 5.5vw, 3.5rem) * var(--font-scale));
+    --h2-size: calc(clamp(1.1rem, 3vw, 2rem) * var(--font-scale));
+  }
+  .nav-dots { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- Progress bar -->
+<div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressFill"></div></div>
+
+<!-- Nav dots — built by JS -->
+<nav class="nav-dots" id="navDots" aria-label="Slide navigation"></nav>
+
+<!-- Slide counter -->
+<div class="slide-counter" id="slideCounter">1 / 6</div>
+
+<!-- Cursor effects canvas -->
+<canvas id="cursorFx" aria-hidden="true"></canvas>
+
+<!-- Font scale + fullscreen -->
+<div class="font-scale-ctrl" id="fontScaleCtrl" aria-label="Display controls">
+  <button id="fontScaleDown" aria-label="Decrease font size" title="Smaller (⌘ ,)">A−</button>
+  <span id="fontScaleLabel">100%</span>
+  <button id="fontScaleUp"   aria-label="Increase font size" title="Larger (⌘ .)">A+</button>
+  <span class="ctrl-divider" aria-hidden="true"></span>
+  <button id="fullscreenBtn" class="fs-btn" aria-label="Enter fullscreen" title="Fullscreen (⌘ F)">⛶</button>
+</div>
+
+<!-- Inline editing -->
+<div class="edit-hotzone" aria-hidden="true"></div>
+<button class="edit-toggle" id="editToggle" title="Edit mode (E)">✏️</button>
+<div class="edit-banner" id="editBanner">Edit mode — click any text. ⌘S to save</div>
+
+<div class="slides-container" id="slidesContainer">
+
+  <!-- ============================================================
+       SLIDE 1 — TITLE (split layout)
+       ============================================================ -->
+  <section class="slide title-slide active" data-slide="1" aria-label="Title">
+    <div class="title-top">
+      <img src="assets/ais_header_framed.png" alt="AIS Sharjah" class="ais-logo reveal d1">
+      <span class="title-eyebrow reveal d1">Executive Briefing · 2026</span>
+      <h1 class="title-main reveal d2">AIS<br>Attendance<br>App</h1>
+      <p class="title-sub reveal d3">A comprehensive, data-driven solution for enhancing student engagement and administrative efficiency.</p>
+    </div>
+    <div class="title-bot">
+      <span class="title-meta reveal d3">Prepared for AIS Leadership</span>
+      <p class="title-tagline reveal d4">From <span style="color: var(--accent);">policing absence</span> → celebrating presence.</p>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       SLIDE 2 — APP WALKTHROUGH (video embed)
+       ============================================================ -->
+  <section class="slide content-slide" data-slide="2" aria-label="App walkthrough">
+    <div class="content-card">
+      <img src="assets/ais_header_framed.png" alt="AIS Sharjah" class="ais-logo">
+
+      <div class="slide-2-grid">
+        <div class="slide-2-text">
+          <span class="eyebrow reveal-left d1"><span class="num">02</span> App Walkthrough</span>
+          <h2 class="slide-title reveal-left d2">See it in action.</h2>
+          <div class="accent-bar reveal-left d3"></div>
+          <p class="body-text reveal-left d3">Click play to watch the full walkthrough.</p>
+          <div class="feature-pills reveal-left d4" style="flex-direction: column; align-items: flex-start;">
+            <span class="pill">Real-time dashboard updates</span>
+            <span class="pill">Intuitive user interface</span>
+            <span class="pill">Instant data retrieval</span>
+          </div>
+        </div>
+
+        <div class="video-wrap reveal-scale d3">
+          <iframe
+            src="https://drive.google.com/file/d/1_8GmsVST4mcisleMgqi7GVx-aIdoSQT3/preview"
+            allow="autoplay"
+            allowfullscreen
+            title="AIS Attendance App walkthrough">
+          </iframe>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       SLIDE 3 — THE CORE OBJECTIVE
+       ============================================================ -->
+  <section class="slide content-slide" data-slide="3" aria-label="The core objective">
+    <div class="content-card">
+      <img src="assets/ais_header_framed.png" alt="AIS Sharjah" class="ais-logo">
+      <span class="eyebrow reveal d1"><span class="num">03</span> The Core Objective</span>
+      <h2 class="slide-title reveal d2">Weekly Engagement Emails</h2>
+      <div class="accent-bar reveal d3"></div>
+
+      <div class="slide-3-grid">
+        <div class="slide-3-text">
+          <p class="body-text reveal d3">The primary goal of the app is to <strong style="color: var(--accent-deep);">automate and personalise communication</strong>, bridging the gap between school data and parent/student awareness.</p>
+
+          <div class="audience-grid" style="grid-template-columns: 1fr;">
+            <div class="audience-card reveal d4">
+              <span class="audience-label">For Parents</span>
+              <p class="audience-body">Clear visibility on their child's attendance.</p>
+            </div>
+            <div class="audience-card reveal d5">
+              <span class="audience-label">For Students</span>
+              <p class="audience-body">Accountability and positive reinforcement.</p>
+            </div>
+            <div class="audience-card admin reveal d6">
+              <span class="audience-label">For Admin</span>
+              <p class="audience-body">Zero manual effort required.</p>
+            </div>
+          </div>
+
+          <div class="safety-callout reveal d6">
+            <span class="safety-icon">🔒</span>
+            <p class="safety-text"><strong>Safety first:</strong> All data uses Unique Identifiers in the links instead of usernames or school IDs.</p>
+          </div>
+        </div>
+
+        <div class="slide-3-image reveal-scale d4">
+          <img src="assets/parent-email.png" alt="Weekly attendance report email that parents receive">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       SLIDE 4 — PARENT COMMUNICATION (celebrating success)
+       ============================================================ -->
+  <section class="slide content-slide" data-slide="4" aria-label="Parent communication">
+    <div class="content-card">
+      <img src="assets/ais_header_framed.png" alt="AIS Sharjah" class="ais-logo">
+
+      <div class="two-col">
+        <div class="col">
+          <span class="eyebrow reveal-left d1"><span class="num">04</span> Parent Communication</span>
+          <h2 class="slide-title reveal-left d2">Celebrating Success.</h2>
+          <div class="accent-bar reveal-left d3"></div>
+          <p class="emphasis reveal-left d3">When a student achieves <em>100% attendance</em> in the last 7 days, the Attendance App celebrates this achievement!</p>
+          <p class="body-text reveal-left d4">This proactive approach builds a <strong style="color: var(--accent-deep);">positive relationship</strong> between school and families, shifting from <em style="color: var(--text-mute); font-style: italic;">policing absence</em> to <strong style="color: var(--accent);">celebrating presence</strong>.</p>
+        </div>
+        <div class="col embed-col reveal-scale d5">
+          <div class="app-embed">
+            <iframe
+              src="https://attend.thefeedbackapp.net/primary-parent/d29d8f10-452a-49d5-85a8-57f2514d3162"
+              title="AIS Attendance App — live parent view (reloads each visit)"
+              allow="fullscreen"
+              data-reload-on-show="true">
+            </iframe>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       SLIDE 5 — STUDENT INSIGHTS (constructive feedback)
+       ============================================================ -->
+  <section class="slide content-slide" data-slide="5" aria-label="Student insights">
+    <div class="content-card">
+      <img src="assets/ais_header_framed.png" alt="AIS Sharjah" class="ais-logo">
+
+      <div class="two-col">
+        <div class="col">
+          <span class="eyebrow reveal-left d1"><span class="num">05</span> Student Insights</span>
+          <h2 class="slide-title reveal-left d2">Constructive Feedback.</h2>
+          <div class="accent-bar reveal-left d3"></div>
+          <p class="body-text reveal-left d3">For students with less than 100% attendance, the app provides a detailed breakdown of the impact.</p>
+          <ul class="bullet-list">
+            <li class="reveal-left d4"><strong>Visualised loss:</strong> percentage dropped.</li>
+            <li class="reveal-left d5"><strong>Real impact:</strong> minutes, hours, and lessons missed.</li>
+            <li class="reveal-left d6"><strong>Actionable:</strong> encourages improvement next week.</li>
+          </ul>
+        </div>
+        <div class="col embed-col reveal-scale d5">
+          <div class="app-embed">
+            <iframe
+              src="https://attend.thefeedbackapp.net/primary-parent/d29d8f10-452a-49d5-85a8-57f2514d3162"
+              title="AIS Attendance App — live parent view (preloaded)"
+              allow="fullscreen">
+            </iframe>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       SLIDE 6 — Q&A (bookend with title slide)
+       ============================================================ -->
+  <section class="slide qa-slide" data-slide="6" aria-label="Q and A">
+    <div class="qa-top">
+      <img src="assets/ais_header_framed.png" alt="AIS Sharjah" class="ais-logo reveal d1">
+      <h2 class="qa-main reveal d2">Q <em>&amp;</em> A</h2>
+    </div>
+    <div class="qa-bot">
+      <p class="qa-thanks reveal d3">Thank you for your time.</p>
+      <span class="qa-meta reveal d3">AIS Attendance App · 2026</span>
+    </div>
+  </section>
+
+</div><!-- /slides-container -->
+
+<script>
+/* ============================================================
+   SLIDE PRESENTATION CONTROLLER
+   ============================================================ */
+class SlidePresentation {
+  constructor() {
+    this.slides = Array.from(document.querySelectorAll('.slide'));
+    this.total = this.slides.length;
+    this.current = 0;
+    this.navDotsContainer = document.getElementById('navDots');
+    this.progressFill = document.getElementById('progressFill');
+    this.slideCounter = document.getElementById('slideCounter');
+    this.initialLoad = false; /* first update() call skips iframe reload logic */
+    this.buildNavDots();
+    this.update();
+    this.bindKeyboard();
+    this.bindWheel();
+    this.bindTouch();
+  }
+  buildNavDots() {
+    this.navDotsContainer.innerHTML = '';
+    this.slides.forEach((_, i) => {
+      const btn = document.createElement('button');
+      btn.setAttribute('aria-label', `Go to slide ${i + 1}`);
+      btn.addEventListener('click', () => this.goTo(i));
+      this.navDotsContainer.appendChild(btn);
+    });
+  }
+  goTo(i) {
+    if (i < 0 || i >= this.total || i === this.current) return;
+    this.slides[this.current].classList.remove('active');
+    this.current = i;
+    this.slides[this.current].classList.add('active');
+    this.update();
+  }
+  next() { this.goTo(this.current + 1); }
+  prev() { this.goTo(this.current - 1); }
+  update() {
+    this.progressFill.style.width = ((this.current + 1) / this.total * 100) + '%';
+    this.slideCounter.textContent = `${this.current + 1} / ${this.total}`;
+    Array.from(this.navDotsContainer.children).forEach((dot, i) => {
+      dot.classList.toggle('active', i === this.current);
+    });
+    this.reloadMarkedIframes();
+  }
+
+  /* For any iframe tagged data-reload-on-show="true" on the now-active slide,
+     force a fresh reload by blanking src then restoring it on the next frame.
+     Skips the initial load (so the iframe doesn't reload before it first paints). */
+  reloadMarkedIframes() {
+    if (this.initialLoad === false) {
+      this.initialLoad = undefined; /* now allow reloads from this point on */
+      return;
+    }
+    const active = this.slides[this.current];
+    active.querySelectorAll('iframe[data-reload-on-show="true"]').forEach(iframe => {
+      const src = iframe.getAttribute('src');
+      iframe.setAttribute('src', 'about:blank');
+      requestAnimationFrame(() => iframe.setAttribute('src', src));
+    });
+  }
+  bindKeyboard() {
+    const NEXT = ['ArrowRight', 'ArrowDown', 'PageDown', ' '];
+    const PREV = ['ArrowLeft', 'ArrowUp', 'PageUp'];
+    document.addEventListener('keydown', (e) => {
+      if (e.target.isContentEditable || ['INPUT','TEXTAREA','IFRAME'].includes(e.target.tagName)) return;
+      if (NEXT.includes(e.key)) { e.preventDefault(); this.next(); }
+      if (PREV.includes(e.key)) { e.preventDefault(); this.prev(); }
+      if (e.key === 'Home') { e.preventDefault(); this.goTo(0); }
+      if (e.key === 'End')  { e.preventDefault(); this.goTo(this.total - 1); }
+    });
+  }
+  bindWheel() {
+    let cooldown = false;
+    window.addEventListener('wheel', (e) => {
+      /* Don't hijack wheel when the mouse is over the video iframe */
+      if (e.target.closest('.video-wrap')) return;
+      if (cooldown) return;
+      if (Math.abs(e.deltaY) < 30) return;
+      cooldown = true;
+      setTimeout(() => cooldown = false, 600);
+      if (e.deltaY > 0) this.next(); else this.prev();
+    }, { passive: true });
+  }
+  bindTouch() {
+    let startY = 0, startX = 0;
+    window.addEventListener('touchstart', (e) => {
+      startY = e.touches[0].clientY;
+      startX = e.touches[0].clientX;
+    }, { passive: true });
+    window.addEventListener('touchend', (e) => {
+      const dy = e.changedTouches[0].clientY - startY;
+      const dx = e.changedTouches[0].clientX - startX;
+      if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 60) {
+        if (dy < 0) this.next(); else this.prev();
+      } else if (Math.abs(dx) > 60) {
+        if (dx < 0) this.next(); else this.prev();
+      }
+    }, { passive: true });
+  }
+}
+
+/* ============================================================
+   FONT SCALE CONTROLLER
+   ============================================================ */
+class FontScaleController {
+  constructor() {
+    this.STEP = 0.1; this.MIN = 0.5; this.MAX = 2.0;
+    this.scale = parseFloat(localStorage.getItem('ais_fontScale') || '1');
+    this.labelEl = document.getElementById('fontScaleLabel');
+    this.btnUp   = document.getElementById('fontScaleUp');
+    this.btnDown = document.getElementById('fontScaleDown');
+    this.btnUp.addEventListener('click',   () => this.increase());
+    this.btnDown.addEventListener('click', () => this.decrease());
+    document.addEventListener('keydown', (e) => {
+      if (!e.metaKey) return;
+      if (e.key === '.') { e.preventDefault(); this.increase(); }
+      if (e.key === ',') { e.preventDefault(); this.decrease(); }
+    });
+    this.apply();
+  }
+  increase() { this.setScale(this.scale + this.STEP); }
+  decrease() { this.setScale(this.scale - this.STEP); }
+  setScale(v) {
+    this.scale = Math.round(Math.max(this.MIN, Math.min(this.MAX, v)) * 10) / 10;
+    this.apply();
+    localStorage.setItem('ais_fontScale', this.scale);
+  }
+  apply() {
+    document.documentElement.style.setProperty('--font-scale', this.scale);
+    this.labelEl.textContent = Math.round(this.scale * 100) + '%';
+    this.btnDown.disabled = this.scale <= this.MIN;
+    this.btnUp.disabled   = this.scale >= this.MAX;
+    document.body.classList.toggle('scaled-up', this.scale > 1.2);
+  }
+}
+
+/* ============================================================
+   FULLSCREEN CONTROLLER
+   ============================================================ */
+class FullscreenController {
+  constructor() {
+    this.btn = document.getElementById('fullscreenBtn');
+    this.btn.addEventListener('click', () => this.toggle());
+    document.addEventListener('keydown', (e) => {
+      if (e.metaKey && (e.key === 'f' || e.key === 'F')) { e.preventDefault(); this.toggle(); return; }
+      if ((e.key === 'f' || e.key === 'F') && !e.metaKey && !e.ctrlKey && !e.altKey) {
+        const t = e.target;
+        if (t.isContentEditable || ['INPUT','TEXTAREA','IFRAME'].includes(t.tagName)) return;
+        e.preventDefault(); this.toggle();
+      }
+    });
+    document.addEventListener('fullscreenchange', () => this.syncLabel());
+  }
+  toggle() {
+    if (document.fullscreenElement) document.exitFullscreen();
+    else document.documentElement.requestFullscreen().catch(() => {});
+  }
+  syncLabel() {
+    const isFs = !!document.fullscreenElement;
+    this.btn.setAttribute('aria-label', isFs ? 'Exit fullscreen' : 'Enter fullscreen');
+    this.btn.setAttribute('title',      isFs ? 'Exit fullscreen (⌘ F / Esc)' : 'Fullscreen (⌘ F)');
+  }
+}
+
+/* ============================================================
+   CURSOR EFFECTS — electric blue trail + click-drag ink
+   ============================================================ */
+class CursorEffects {
+  constructor() {
+    this.canDo = matchMedia('(hover: hover) and (pointer: fine)').matches
+              && !matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!this.canDo) return;
+    this.canvas = document.getElementById('cursorFx');
+    this.ctx = this.canvas.getContext('2d');
+    this.accentRgba = (a) => `rgba(67, 97, 238, ${a})`; /* Electric blue */
+    this.trail = []; this.strokes = []; this.current = null;
+    this.TRAIL_LIFE = 400; this.INK_FADE = 1500;
+    this.resize();
+    window.addEventListener('resize', () => this.resize());
+    this.bindEvents();
+    requestAnimationFrame(() => this.tick());
+  }
+  resize() {
+    const dpr = window.devicePixelRatio || 1;
+    this.canvas.width  = innerWidth  * dpr;
+    this.canvas.height = innerHeight * dpr;
+    this.canvas.style.width  = innerWidth  + 'px';
+    this.canvas.style.height = innerHeight + 'px';
+    this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+    this.ctx.scale(dpr, dpr);
+  }
+  bindEvents() {
+    window.addEventListener('mousemove', (e) => {
+      this.trail.push({ x: e.clientX, y: e.clientY, t: performance.now() });
+      if (this.current) this.current.points.push({ x: e.clientX, y: e.clientY });
+    });
+    window.addEventListener('mousedown', (e) => {
+      if (e.button !== 0) return;
+      /* Don't draw on interactive elements, nav, video, etc. */
+      if (e.target.closest('button, a, [contenteditable], input, textarea, .nav-dots, .edit-toggle, .edit-hotzone, iframe, .video-wrap')) return;
+      this.current = { points: [{ x: e.clientX, y: e.clientY }], done: false };
+      this.strokes.push(this.current);
+    });
+    const endStroke = () => {
+      if (this.current) { this.current.done = true; this.current.finishedAt = performance.now(); this.current = null; }
+    };
+    window.addEventListener('mouseup', endStroke);
+    window.addEventListener('mouseleave', endStroke);
+  }
+  tick() {
+    const now = performance.now();
+    const ctx = this.ctx;
+    ctx.clearRect(0, 0, innerWidth, innerHeight);
+    this.trail = this.trail.filter(p => now - p.t < this.TRAIL_LIFE);
+    for (const p of this.trail) {
+      const age = (now - p.t) / this.TRAIL_LIFE;
+      const alpha = 1 - age;
+      const r = 7 * (1 - age * 0.35);
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
+      ctx.fillStyle = this.accentRgba(alpha * 0.6);
+      ctx.shadowBlur = 12;
+      ctx.shadowColor = this.accentRgba(0.8);
+      ctx.fill();
+    }
+    ctx.shadowBlur = 0;
+    for (let i = this.strokes.length - 1; i >= 0; i--) {
+      const s = this.strokes[i];
+      let alpha = 1;
+      if (s.done) {
+        const age = now - s.finishedAt;
+        if (age >= this.INK_FADE) { this.strokes.splice(i, 1); continue; }
+        alpha = 1 - age / this.INK_FADE;
+      }
+      if (s.points.length < 2) continue;
+      ctx.beginPath();
+      ctx.moveTo(s.points[0].x, s.points[0].y);
+      for (let j = 1; j < s.points.length; j++) ctx.lineTo(s.points[j].x, s.points[j].y);
+      ctx.strokeStyle = this.accentRgba(alpha);
+      ctx.lineWidth = 4;
+      ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+      ctx.shadowBlur = 12;
+      ctx.shadowColor = this.accentRgba(alpha * 0.7);
+      ctx.stroke();
+    }
+    ctx.shadowBlur = 0;
+    requestAnimationFrame(() => this.tick());
+  }
+}
+
+/* ============================================================
+   INLINE EDITOR
+   ============================================================ */
+class InlineEditor {
+  constructor() {
+    this.isActive = false;
+    this.toggle  = document.getElementById('editToggle');
+    this.banner  = document.getElementById('editBanner');
+    this.hotzone = document.querySelector('.edit-hotzone');
+    this.selector = 'h1, h2, h3, p, li, span.audience-label, span.audience-body, span.pill, .emphasis, .body-text, .title-sub, .title-tagline, .qa-thanks';
+    this.toggle.addEventListener('click', () => this.toggleMode());
+    this.hotzone.addEventListener('click', () => this.toggleMode());
+    let hideT = null;
+    this.hotzone.addEventListener('mouseenter', () => { clearTimeout(hideT); this.toggle.classList.add('show'); });
+    this.hotzone.addEventListener('mouseleave', () => {
+      hideT = setTimeout(() => { if (!this.isActive) this.toggle.classList.remove('show'); }, 400);
+    });
+    this.toggle.addEventListener('mouseenter', () => clearTimeout(hideT));
+    this.toggle.addEventListener('mouseleave', () => {
+      hideT = setTimeout(() => { if (!this.isActive) this.toggle.classList.remove('show'); }, 400);
+    });
+    document.addEventListener('keydown', (e) => {
+      if ((e.key === 'e' || e.key === 'E') && !e.metaKey && !e.ctrlKey && !e.altKey) {
+        const t = e.target;
+        if (t.isContentEditable || ['INPUT','TEXTAREA','IFRAME'].includes(t.tagName)) return;
+        this.toggleMode();
+      }
+      if ((e.metaKey || e.ctrlKey) && e.key === 's') { e.preventDefault(); if (this.isActive) this.exportFile(); }
+    });
+  }
+  toggleMode() {
+    this.isActive = !this.isActive;
+    document.body.classList.toggle('edit-active', this.isActive);
+    this.toggle.classList.toggle('active', this.isActive);
+    this.banner.classList.toggle('active', this.isActive);
+    this.toggle.textContent = this.isActive ? '✓' : '✏️';
+    document.querySelectorAll(this.selector).forEach(el => {
+      if (this.isActive) el.setAttribute('contenteditable', 'true');
+      else el.removeAttribute('contenteditable');
+    });
+  }
+  exportFile() {
+    const editable = Array.from(document.querySelectorAll('[contenteditable]'));
+    editable.forEach(el => el.removeAttribute('contenteditable'));
+    document.body.classList.remove('edit-active');
+    this.toggle.classList.remove('active', 'show');
+    this.banner.classList.remove('active');
+    const html = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+    document.body.classList.add('edit-active');
+    editable.forEach(el => el.setAttribute('contenteditable', 'true'));
+    this.toggle.classList.add('active');
+    this.banner.classList.add('active');
+    const blob = new Blob([html], { type: 'text/html' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'AIS Attendance App.html';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+}
+
+/* Boot */
+const fontScaleCtrl  = new FontScaleController();
+const fullscreenCtrl = new FullscreenController();
+const cursorFx       = new CursorEffects();
+const editor         = new InlineEditor();
+const presentation   = new SlidePresentation();
+</script>
+</body>
+</html>
